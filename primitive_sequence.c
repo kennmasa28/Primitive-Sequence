@@ -1,11 +1,10 @@
 //coding:utf-8
-//教訓：二重にint badfirst= ~ とするとバグる
-//ハーディ階層に合わせている
+//consistent with Hardy hierarchy
 #include <stdio.h>
 #include <stdlib.h>
 
 int main(){
-  //変数設定------------------------------------------
+  //define variable------------------------------------------
   int *s;
   int k=2;//-----------changeable
   s = (int *)malloc(sizeof(int)*(k+1));
@@ -23,29 +22,29 @@ int main(){
   int exist;
   int badfirst;
 
-  //最初の配列を表示-------------------------------------
+  //output initial state-------------------------------------
   printf("(");
   for (int i = 0;i < k; i++) {
     printf("%d,",s[i]);
   }
   printf("%d", s[k]);
   printf(")[%d]\n",n);
- //原始数列を変形----------------------------------------
+ //find good and bad part----------------------------------------
   while (k != 0){
 
     if (s[k]==0)
     {
-      //S_k = 0 のときのルール
+      //if S_k = 0
       k = k - 1;
       s = (int *)realloc(s,sizeof(int)*(k+1));
       n = n + 1;
     }
     else
     {
-      //S_k != 0 のときのルール
+      //if S_k != 0
       exist = 0;
       for (int i=0 ; i<=k ;i++){
-        //悪い部分が存在した場合---------------------------------
+        //if bad part exist---------------------------------
         if (s[k-i]<s[k]){
             badfirst = k-i;
             printf("\n" );
@@ -58,9 +57,9 @@ int main(){
               bad[j] = s[k-i+j];
             }
             exist = 1;
-            i = k;//breakのつもり
+            i = k;//break
         }//if
-        //悪い部分が存在しなかった場合-----------------------------
+        //if bad part don't exist-----------------------------
         if (i==k && exist==0){
           badfirst = k;
           good = (int *)realloc(good,sizeof(int)*(badfirst));
@@ -71,9 +70,9 @@ int main(){
         }
 
       }//for
-      //ここからgoodとbadを原始数列に代入---------------------------
+      //create new primitive sequence---------------------------
       if (exist == 0){
-        //良い部分だけのときの処理---------------------
+        //if only good part---------------------
         s = (int *)realloc(s,sizeof(int)*k);
         for (int i=0 ; i<badfirst; i++){
           s[i] = good[i];
@@ -81,13 +80,13 @@ int main(){
         k = k-1;
 
       }else{
-        //悪い部分もあるときの処理-------------------
+        //if bad part exist-------------------
         s = (int *)realloc(s,sizeof(int)*(badfirst+(k-badfirst)*n));
         //----良い部分を埋める----
         for (int i=0 ; i<badfirst; i++){
           s[i] = good[i];
         }
-        //----悪い部分を埋める-------
+        //----copy bad part-------
         for (int i=0 ; i<n; i++){
           for (int j=0 ; j<k-badfirst; j++){
             s[badfirst + i*(k-badfirst) + j] = bad[j];
@@ -96,9 +95,9 @@ int main(){
         k = badfirst+(k-badfirst)*n-1;//kの更新
       }
 
-    }//else(右端が0かどうかの)
+    }
 
-    //nをf(n)にするのと、新しい原始数列を表示--------------
+    //n become f(n) and output new sequence--------------
     printf("(");
     for (int i = 0; i < k; i++) {
       printf("%d,",s[i]);
@@ -107,7 +106,7 @@ int main(){
     printf(")[%d]\n",n);
   }//while
 
-  //最後の出力--------------------------------------------------------
+  //final output--------------------------------------------------------
   if (s[0]==0){
     n = n + 1;
   }
