@@ -1,81 +1,106 @@
 //coding:utf-8
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-void output(int s[], int k, int n);
+int Input();
+int Error(int error_num);
+int ctoi(char c);
+int output();
+int BadAndGood();
+
+int *s;
+int k;
+int n;
+
 
 int main()
 {
-  //define variable------------------------------------------
-  int k;//------------------------------the digits of primitive sequence
-  int pre_s;
-  int n;//------------------------------parameter of primitive sequence
-  int *good;//--------------------------good part
-  int *bad;//---------------------------bad part
-  good = (int *)malloc(sizeof(int));
-  bad = (int *)malloc(sizeof(int));
-  int exist;//-------------------------indicate that if bad part exist or not
-  int badfirst;//----------------------the index of the most right element such that S[i]<S[K]
+    Input();
+    output();
+    int roop = 0;
+    while (k != 0)
+    {
+      if (s[k]==0)//-----if S_k = 0
+      {
+        k = k - 1;
+        s = (int *)realloc(s,sizeof(int)*(k+1));
+        n = n + 1;
+      }
+      else //-----if S_k != 0
+      {
+        BadAndGood();
+      }
 
-  //input-------------------------------------------
-  printf("How much is the digits of primitive sequence? \n");
-  printf("Please input 1-9 number. (For example, if you think (0,1,2,0), you should input 4)\n");
-  scanf("%d", &k);
-  k = k - 1;
-  printf("\n");
-  int *s;
-  s = (int *)malloc(sizeof(int)*(k+1));
-  if (s == NULL){
-    exit(0);
+    //output new sequence
+      output();
+      roop = roop + 1;
+      if (roop > 100) Error(5);
+    }
+
+  //final output--------------------------------------------------------
+  if (s[0]==0){
+    n = n + 1;
   }
+  printf("final output: %d\n", n);
+  return 0;
 
-  for(int i=0 ; i<=k ;i++)
-  {
-    if(i==0)
-    {
-      printf("Please input 1st element from the left.(S[0])\n");
-      scanf("%d", &pre_s);
-      s[i] = pre_s;
-    }
-    if(i==1)
-    {
-      printf("Please input 2nd element from the left.(S[1])\n");
-      scanf("%d", &pre_s);
-      s[i] = pre_s;
-    }
-    if(i==2)
-    {
-      printf("Please input 3rd element from the left.(S[2])\n");
-      scanf("%d", &pre_s);
-      s[i] = pre_s;
-    }
-    if(i>=3)
-    {
-      printf("Please input %d th element from the left.(S[%d])\n",i+1,i);
-      scanf("%d", &pre_s);
-      s[i] = pre_s;
-    }
-  }
+}
 
-  printf("Please input parameter n of primitive sequence.\n");
-  scanf("%d", &n);
-  printf("\n");
-
-  //output initial state-------------------------------------
-  output(s,k,n);
-
-  //main part----------------------------------------
-  while (k != 0)
-  {
-    if (s[k]==0)//-----if S_k = 0
+int Input()
+{
+    printf("Please input primitive sequence, like this: (0,1,2)[2]\n");
+    printf(">>");
+    char str[256];
+	  scanf("%[^\n]",str);
+    int str_num = strlen(str);
+    k = (str_num - 6)/2;
+    s = (int *)malloc(sizeof(int)*k+1);
+    //printf("ok");
+    for (int i=0; i<str_num; i++)
     {
-      k = k - 1;
-      s = (int *)realloc(s,sizeof(int)*(k+1));
-      n = n + 1;
+        //printf("%c\n", str[i]);
+        if (str[0] != '('){Error(0);}
+        if (str[i] == ' '){Error(1);}
+        if (str[i] == ',' && str[i+1] == ','){Error(2);}
+        s[0] = ctoi(str[1]);
+        if (str[i] == ','){
+            if (i%2 != 0) Error(3);
+            s[i/2] = ctoi(str[i+1]);
+        }
+        if (str[i] == ')'){
+            if (str[i+1] == '[' && str[i+3] == ']'){
+                n = ctoi(str[i+2]);
+            }else{
+                Error(4);
+            }
+        }
     }
-    else //-----if S_k != 0
-    {
-      exist = 0;
+
+    return 0;
+}
+
+int output()
+{
+    printf("(");
+     for(int i=0; i<=k;i++){
+        printf("%d",s[i]);
+        if (i<k) printf(",");
+        if (i==k) printf(")");
+    }
+    printf("[%d]\n",n);
+}
+
+int BadAndGood()
+{
+    int *good;//--------------------------good part
+    int *bad;//---------------------------bad part
+    good = (int *)malloc(sizeof(int));
+    bad = (int *)malloc(sizeof(int));
+    int exist;//-------------------------indicate that if bad part exist or not
+    int badfirst;//----------------------the index of the most right element such that S[i]<S[K]
+
+     exist = 0;
       for (int i=0 ; i<=k ;i++)
       {
         //if bad part exist---------------------------------
@@ -132,29 +157,55 @@ int main()
         }
         k = badfirst+(k-badfirst)*n-1;//update k
       }
+}
 
-    }
-
-    //output new sequence-----------------------------------------------
-    output(s,k,n);
-  }//while
-
-  //final output--------------------------------------------------------
-  if (s[0]==0){
-    n = n + 1;
-  }
-  printf("finish!...%d\n", n);
-  return 0;
-}//main
-
-
-//function of output-----------------------------------------------------
-void output(int s[], int k, int n)
+int Error(int error_num)
 {
-  printf("(");
-  for (int i = 0;i < k; i++) {
-    printf("%d,",s[i]);
-  }
-  printf("%d", s[k]);
-  printf(")[%d]\n",n);
+    switch (error_num)
+    {
+    case 0:
+        printf("Error! First word must be '('");
+        break;
+
+    case 1:
+        printf("Error! space ' ' is forbided");
+        break;
+
+    case 2:
+        printf("Error! There must be an integer between ',' and ','");
+        break;
+
+    case 3:
+        printf("Error! Input format is invalid. You can set only 0-9 number.");
+        break;
+
+    case 4:
+        printf("Error! Next to ')' must be '[' 0-9 number ']'");
+        break;
+
+    case 5:
+        printf("It is difficult to calculate more!");
+        break;
+
+    default:
+        break;
+    }
+    //printf("E");
+    exit(0);
+}
+
+int ctoi(char c) {
+	switch (c) {
+		case '0': return 0;
+		case '1': return 1;
+		case '2': return 2;
+		case '3': return 3;
+		case '4': return 4;
+		case '5': return 5;
+		case '6': return 6;
+		case '7': return 7;
+		case '8': return 8;
+		case '9': return 9;
+		default: Error(3);
+	}
 }
